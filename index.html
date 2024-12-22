@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Example</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        #messages {
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            padding: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .message {
+            margin-bottom: 10px;
+            padding: 5px;
+            border: 1px solid #ddd;
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <h1>WebSocket Message Receiver</h1>
+    <img src="https://storage.googleapis.com/camera-frames/frames/video1.jpg" alt="video1" width="500" height="600" id="video1">
+    <img src="https://storage.googleapis.com/camera-frames/frames/video2.jpg" alt="video2" width="500" height="600" id="video2">
+    <img src="https://storage.googleapis.com/camera-frames/frames/video3.jpg" alt="video3" width="500" height="600" id="video3">
+
+
+    <div id="messages"></div>
+    <script>
+        // Create a WebSocket connection to the WebSocket server
+        const socket = new WebSocket('ws://localhost:8080'); // Update with your server's URL if needed
+
+        // Display when the WebSocket connection is open
+        socket.addEventListener('open', () => {
+            console.log('Connected to WebSocket server');
+        });
+
+        // Display incoming messages and perform actions
+        socket.addEventListener('message', (event) => {
+            console.log('Message from server:', event.data);
+            updateImageById(event.data);
+        });
+
+        // Handle WebSocket connection closure
+        socket.addEventListener('close', () => {
+            console.log('WebSocket connection closed');
+        });
+
+        // Handle WebSocket errors
+        socket.addEventListener('error', (error) => {
+            console.error('WebSocket error:', error);
+        });
+
+        // Function to display messages on the page
+        function displayMessage(message) {
+            const messagesDiv = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message');
+            messageDiv.textContent = message;
+            messagesDiv.appendChild(messageDiv);
+
+            // Automatically scroll to the bottom of the messages container
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function updateImageById(imageId) {
+            const image = document.getElementById(imageId);
+            
+            if (image) {
+                const currentSrc = image.src;
+                const timestamp = new Date().getTime(); // Adds a unique query parameter to prevent caching
+                image.src = `${currentSrc.split('?')[0]}?t=${timestamp}`; // Replaces the src with the same URL but with a unique query string to force reload
+            } else {
+                console.error(`Image with id ${imageId} not found`);
+            }
+        }
+    </script>
+</body>
+</html>
